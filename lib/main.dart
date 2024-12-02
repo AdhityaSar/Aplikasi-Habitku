@@ -1,3 +1,4 @@
+import 'package:aplikasi_habitku/my_navbar.dart';
 import 'package:aplikasi_habitku/pages/homepage.dart';
 import 'package:flutter/material.dart';
 
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Airbnb',
       ),
-      home: const MyHomePage(),
+      home: const MyNavbar(),
     );
   }
 }

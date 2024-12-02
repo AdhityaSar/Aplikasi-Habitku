@@ -88,63 +88,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        height: 70,
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.home,
-                color: _selectedIndex == 0 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
-                size: 30,
-              ),
-              onPressed: () => _onItemTapped(0),
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.bar_chart,
-                color: _selectedIndex == 1 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
-                size: 30,
-              ),
-              onPressed: () => _onItemTapped(1),
-            ),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xff3843FF),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 25,
-                ),
-                onPressed: () => _onItemTapped(2),
-              ),
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.history,
-                color: _selectedIndex == 3 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
-                size: 30,
-              ),
-              onPressed: () => _onItemTapped(3),
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.settings,
-                color: _selectedIndex == 4 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
-                size: 30,
-              ),
-              onPressed: () => _onItemTapped(4),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
