@@ -3,7 +3,7 @@
 ## Anggota Kelompok
 - 2211104089 Adhitya Sofwan Al Rasyid
 - 2211104046 Sabrina Nur Afifah
-- 2211104050 Rafli Fauzan Nur
+- 2211104050 Rafli Fauzan Ra'uf
 - 2211104054 Muhammad Ralfi
 - 2211104064 Dawnie Julian Nugroho
 
