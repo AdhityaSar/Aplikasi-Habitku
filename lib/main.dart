@@ -1,5 +1,4 @@
 import 'package:aplikasi_habitku/my_navbar.dart';
-import 'package:aplikasi_habitku/pages/homepage.dart';
 import 'package:flutter/material.dart';
 
 void main() {
