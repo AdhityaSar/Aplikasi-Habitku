@@ -1,12 +1,19 @@
-import 'package:aplikasi_habitku/pages/historypage.dart';
-import 'package:aplikasi_habitku/pages/homepage.dart';
-import 'package:aplikasi_habitku/pages/settingspage.dart';
-import 'package:aplikasi_habitku/pages/statspage.dart';
-import 'package:aplikasi_habitku/pages/your_stats.dart';
+import 'package:aplikasi_habitku/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'pages/homepage.dart';
+import 'pages/statspage.dart';
+import 'pages/historypage.dart';
+import 'pages/settingspage.dart';
 
 class MyNavbar extends StatefulWidget {
-  const MyNavbar({super.key});
+  final ValueChanged<bool> onThemeChanged; // Callback untuk mengubah tema
+  final bool isDarkMode; // Status tema saat ini
+
+  const MyNavbar({
+    super.key,
+    required this.onThemeChanged,
+    required this.isDarkMode,
+  });
 
   @override
   State<MyNavbar> createState() => _MyNavbarState();
@@ -14,14 +21,6 @@ class MyNavbar extends StatefulWidget {
 
 class _MyNavbarState extends State<MyNavbar> {
   int _selectedIndex = 0;
-
-  final List<Widget> _pages = <Widget>[
-    MyHomePage(), 
-    StatsPage(),
-    Center(child: Text('Add Activity Page')), // Placeholder for Add Activity
-    Historypage(), // Placeholder for History
-    Settingspage(), // Placeholder for Settings
-  ];
 
   void _onTappedItem(int index) {
     setState(() {
@@ -31,19 +30,35 @@ class _MyNavbarState extends State<MyNavbar> {
 
   @override
   Widget build(BuildContext context) {
+    print('MyNavbar - Current Theme: ${widget.isDarkMode ? "Dark" : "Light"}');
+
+    // Inisialisasi halaman setiap kali build dijalankan
+    final _pages = <Widget>[
+      MyHomePage(),
+      StatsPage(),
+      Center(child: Text('Add Activity Page')), // Placeholder untuk Add Activity
+      Historypage(),
+      Settingspage(
+        onThemeChanged: widget.onThemeChanged,
+        isDarkMode: widget.isDarkMode,
+      ),
+    ];
+
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text(" "),
+      ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
         height: 70,
-        color: Colors.white,
+        color: widget.isDarkMode ? Colors.black : Colors.white, // Background berubah sesuai mode
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
               icon: Icon(
                 Icons.home,
-                color: _selectedIndex == 0 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
+                color: _selectedIndex == 0 ? primary : (widget.isDarkMode ? Colors.white : Colors.black45), // Warna icon sesuai mode
                 size: 30,
               ),
               onPressed: () => _onTappedItem(0),
@@ -51,7 +66,7 @@ class _MyNavbarState extends State<MyNavbar> {
             IconButton(
               icon: Icon(
                 Icons.bar_chart,
-                color: _selectedIndex == 1 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
+                color: _selectedIndex == 1 ? primary : (widget.isDarkMode ? Colors.white : Colors.black45), // Warna icon sesuai mode
                 size: 30,
               ),
               onPressed: () => _onTappedItem(1),
@@ -60,7 +75,7 @@ class _MyNavbarState extends State<MyNavbar> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xff3843FF),
+                color: primary, // Warna background ikon tombol tambah
                 shape: BoxShape.circle,
               ),
               child: IconButton(
@@ -75,7 +90,7 @@ class _MyNavbarState extends State<MyNavbar> {
             IconButton(
               icon: Icon(
                 Icons.history,
-                color: _selectedIndex == 3 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
+                color: _selectedIndex == 3 ? primary : (widget.isDarkMode ? Colors.white : Colors.black45), // Warna icon sesuai mode
                 size: 30,
               ),
               onPressed: () => _onTappedItem(3),
@@ -83,7 +98,7 @@ class _MyNavbarState extends State<MyNavbar> {
             IconButton(
               icon: Icon(
                 Icons.settings,
-                color: _selectedIndex == 4 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
+                color: _selectedIndex == 4 ? primary : (widget.isDarkMode ? Colors.white : Colors.black45), // Warna icon sesuai mode
                 size: 30,
               ),
               onPressed: () => _onTappedItem(4),
