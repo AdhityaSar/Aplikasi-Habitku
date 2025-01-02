@@ -1,4 +1,7 @@
+import 'package:aplikasi_habitku/pages/historypage.dart';
 import 'package:aplikasi_habitku/pages/homepage.dart';
+import 'package:aplikasi_habitku/pages/settingspage.dart';
+import 'package:aplikasi_habitku/pages/statspage.dart';
 import 'package:aplikasi_habitku/pages/your_stats.dart';
 import 'package:flutter/material.dart';
 
@@ -14,10 +17,10 @@ class _MyNavbarState extends State<MyNavbar> {
 
   final List<Widget> _pages = <Widget>[
     MyHomePage(), 
-    YourStats(),
+    StatsPage(),
     Center(child: Text('Add Activity Page')), // Placeholder for Add Activity
-    Center(child: Text('History Page')), // Placeholder for History
-    Center(child: Text('Settings Page')), // Placeholder for Settings
+    Historypage(), // Placeholder for History
+    Settingspage(), // Placeholder for Settings
   ];
 
   void _onTappedItem(int index) {
