@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+// <<<<<<< HEAD
 // FILEPATH: d:/Semester_5/Aplikasi-Habitku/lib/my_navbar.dart
 
 import 'package:aplikasi_habitku/pages/historypage.dart';
@@ -7,14 +7,14 @@ import 'package:aplikasi_habitku/pages/settingspage.dart';
 import 'package:aplikasi_habitku/pages/statspage.dart';
 import 'package:flutter/material.dart';
 import 'package:aplikasi_habitku/pages/addtask.dart';
-=======
-import 'package:aplikasi_habitku/theme/theme.dart';
-import 'package:flutter/material.dart';
-import 'pages/homepage.dart';
-import 'pages/statspage.dart';
-import 'pages/historypage.dart';
-import 'pages/settingspage.dart';
->>>>>>> Darkmode
+// =======
+// import 'package:aplikasi_habitku/theme/theme.dart';
+// import 'package:flutter/material.dart';
+// import 'pages/homepage.dart';
+// import 'pages/statspage.dart';
+// import 'pages/historypage.dart';
+// import 'pages/settingspage.dart';
+// >>>>>>> Darkmode
 
 class MyNavbar extends StatefulWidget {
   final ValueChanged<bool> onThemeChanged; // Callback untuk mengubah tema
