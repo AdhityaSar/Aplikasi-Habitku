@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  final List<Map<String, dynamic>> tasks;
+  final Function(BuildContext) onAddTask;
+
+  const MyHomePage({Key? key, required this.tasks, required this.onAddTask}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -19,7 +22,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           // Bagian Kalender Horizontal
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -92,36 +95,45 @@ class _MyHomePageState extends State<MyHomePage> {
 
           // Konten di Tengah
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/images/noActivities.png',
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(height: 16),
-
-                // Teks di Bawah Ikon
-                Text(
-                  'There is nothing schedule',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xff000000),
+            child: widget.tasks.isEmpty
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/noActivities.png',
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'There is nothing scheduled',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xff000000),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Try adding new activities',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: const Color(0xffA0A0A0),
+                        ),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    itemCount: widget.tasks.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(widget.tasks[index]['title']),
+                        subtitle: Text(widget.tasks[index]['description']),
+                        trailing: Text(widget.tasks[index]['category']),
+                      );
+                    },
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Try adding new activities',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: const Color(0xffA0A0A0),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

@@ -1,9 +1,11 @@
+// FILEPATH: d:/Semester_5/Aplikasi-Habitku/lib/my_navbar.dart
+
 import 'package:aplikasi_habitku/pages/historypage.dart';
 import 'package:aplikasi_habitku/pages/homepage.dart';
 import 'package:aplikasi_habitku/pages/settingspage.dart';
 import 'package:aplikasi_habitku/pages/statspage.dart';
-import 'package:aplikasi_habitku/pages/your_stats.dart';
 import 'package:flutter/material.dart';
+import 'package:aplikasi_habitku/pages/addtask.dart';
 
 class MyNavbar extends StatefulWidget {
   const MyNavbar({super.key});
@@ -14,14 +16,7 @@ class MyNavbar extends StatefulWidget {
 
 class _MyNavbarState extends State<MyNavbar> {
   int _selectedIndex = 0;
-
-  final List<Widget> _pages = <Widget>[
-    MyHomePage(), 
-    StatsPage(),
-    Center(child: Text('Add Activity Page')), // Placeholder for Add Activity
-    Historypage(), // Placeholder for History
-    Settingspage(), // Placeholder for Settings
-  ];
+  List<Map<String, dynamic>> tasks = [];
 
   void _onTappedItem(int index) {
     setState(() {
@@ -29,11 +24,32 @@ class _MyNavbarState extends State<MyNavbar> {
     });
   }
 
+  void _addNewTask(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddTask()),
+    );
+
+    if (result != null) {
+      setState(() {
+        tasks.add(result);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: _pages[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          MyHomePage(tasks: tasks, onAddTask: _addNewTask),
+          StatsPage(),
+          Historypage(),
+          Settingspage(),
+        ],
+      ),
       bottomNavigationBar: Container(
         height: 70,
         color: Colors.white,
@@ -69,24 +85,24 @@ class _MyNavbarState extends State<MyNavbar> {
                   color: Colors.white,
                   size: 25,
                 ),
-                onPressed: () => _onTappedItem(2),
+                onPressed: () => _addNewTask(context),
               ),
             ),
             IconButton(
               icon: Icon(
                 Icons.history,
-                color: _selectedIndex == 3 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
+                color: _selectedIndex == 2 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
                 size: 30,
               ),
-              onPressed: () => _onTappedItem(3),
+              onPressed: () => _onTappedItem(2),
             ),
             IconButton(
               icon: Icon(
                 Icons.settings,
-                color: _selectedIndex == 4 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
+                color: _selectedIndex == 3 ? const Color(0xff3843FF) : const Color(0xffCDCDD0),
                 size: 30,
               ),
-              onPressed: () => _onTappedItem(4),
+              onPressed: () => _onTappedItem(3),
             ),
           ],
         ),
