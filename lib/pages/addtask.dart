@@ -1,112 +1,11 @@
-// // FILEPATH: d:/Semester_5/Aplikasi-Habitku/lib/pages/addtask.dart
-
-// import 'package:flutter/material.dart';
-
-// class AddTask extends StatefulWidget {
-//   @override
-//   _AddTaskState createState() => _AddTaskState();
-// }
-
-// class _AddTaskState extends State<AddTask> {
-//   String? selectedCategory;
-//   final TextEditingController _titleController = TextEditingController();
-//   final TextEditingController _descriptionController = TextEditingController();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Add New Task'),
-//         backgroundColor: Color(0xff3843FF),
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             TextField(
-//               controller: _titleController,
-//               decoration: InputDecoration(
-//                 labelText: 'Title',
-//                 border: OutlineInputBorder(),
-//               ),
-//             ),
-//             SizedBox(height: 16),
-//             TextField(
-//               controller: _descriptionController,
-//               decoration: InputDecoration(
-//                 labelText: 'Description',
-//                 border: OutlineInputBorder(),
-//               ),
-//               maxLines: 3,
-//             ),
-//             SizedBox(height: 16),
-//             DropdownButtonFormField<String>(
-//               value: selectedCategory,
-//               decoration: InputDecoration(
-//                 labelText: 'Category',
-//                 border: OutlineInputBorder(),
-//               ),
-//               items: ['Work', 'Personal', 'Shopping', 'Health']
-//                   .map((String category) {
-//                 return DropdownMenuItem<String>(
-//                   value: category,
-//                   child: Text(category),
-//                 );
-//               }).toList(),
-//               onChanged: (String? newValue) {
-//                 setState(() {
-//                   selectedCategory = newValue;
-//                 });
-//               },
-//             ),
-//           ],
-//         ),
-//       ),
-//       bottomNavigationBar: BottomAppBar(
-//         child: Padding(
-//           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-//           child: Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               TextButton(
-//                 child: Text('Cancel'),
-//                 onPressed: () => Navigator.of(context).pop(),
-//               ),
-//               ElevatedButton(
-//                 child: Text('Confirm'),
-//                 style: ElevatedButton.styleFrom(
-//                   textStyle: TextStyle(color: Colors.purple),
-//                 ),
-//                 onPressed: () {
-//                   if (_titleController.text.isNotEmpty &&
-//                       selectedCategory != null) {
-//                     Navigator.of(context).pop({
-//                       'title': _titleController.text,
-//                       'description': _descriptionController.text,
-//                       'category': selectedCategory,
-//                     });
-//                   } else {
-//                     ScaffoldMessenger.of(context).showSnackBar(
-//                       SnackBar(content: Text('Please fill all required fields')),
-//                     );
-//                   }
-//                 },
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// FILEPATH: d:/Semester_5/Aplikasi-Habitku/lib/pages/addtask.dart
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AddTask extends StatefulWidget {
+  final Map<String, dynamic>? task;
+
+  const AddTask({Key? key, this.task}) : super(key: key);
+
   @override
   _AddTaskState createState() => _AddTaskState();
 }
@@ -118,7 +17,32 @@ class _AddTaskState extends State<AddTask> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
 
-  final List<String> categories = ['Study', 'Task', 'Sports', 'Other'];
+  final List<Map<String, dynamic>> categories = [
+    {'icon': Icons.book, 'label': 'Study'},
+    {'icon': Icons.task, 'label': 'Task'},
+    {'icon': Icons.sports, 'label': 'Sports'},
+    {'icon': Icons.more_horiz, 'label': 'Other'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.task != null) {
+      _titleController.text = widget.task!['title'] ?? '';
+      _descriptionController.text = widget.task!['description'] ?? '';
+      selectedCategory = widget.task!['category'];
+      selectedDate = widget.task!['date'] is String
+          ? DateTime.parse(widget.task!['date'])
+          : widget.task!['date'];
+      selectedTime = widget.task!['time'] != null
+          ? TimeOfDay(
+              hour: int.parse(widget.task!['time'].split(":")[0]),
+              minute: int.parse(widget.task!['time'].split(":")[1]),
+            )
+          : null;
+    }
+  }
 
   @override
   void dispose() {
@@ -127,25 +51,30 @@ class _AddTaskState extends State<AddTask> {
     super.dispose();
   }
 
-  void _showCategoryModal() {
-    showModalBottomSheet(
+    void _showCategoryDialog() {
+    showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          height: 200,
-          child: ListView.builder(
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(categories[index]),
-                onTap: () {
-                  setState(() {
-                    selectedCategory = categories[index];
-                  });
-                  Navigator.pop(context);
-                },
-              );
-            },
+        return AlertDialog(
+          title: Text('Select Category'),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: Icon(categories[index]['icon'] as IconData?, color: Color(0xff3843FF)),
+                  title: Text(categories[index]['label']),
+                  onTap: () {
+                    setState(() {
+                      selectedCategory = categories[index]['label'];
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
           ),
         );
       },
@@ -218,7 +147,7 @@ class _AddTaskState extends State<AddTask> {
                   ],
                 ),
                 TextButton(
-                  onPressed: _showCategoryModal,
+                  onPressed: _showCategoryDialog,
                   child: Text(selectedCategory ?? 'Select Category'),
                 ),
               ],
@@ -280,23 +209,23 @@ class _AddTaskState extends State<AddTask> {
               ),
               ElevatedButton(
                 child: Text('Confirm'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                ),
                 onPressed: () {
                   if (_titleController.text.isNotEmpty &&
                       selectedCategory != null &&
                       selectedDate != null &&
                       selectedTime != null) {
-                    // Membuat objek task baru
                     final newTask = {
                       'title': _titleController.text,
                       'description': _descriptionController.text,
                       'category': selectedCategory,
-                      'date': selectedDate,
-                      'time': selectedTime,
+                      'date': DateTime(
+                        selectedDate!.year,
+                        selectedDate!.month,
+                        selectedDate!.day,
+                        selectedTime!.hour,
+                        selectedTime!.minute,
+                      ), // Gabungkan tanggal dan waktu
                     };
-                    // Mengembalikan task baru ke halaman sebelumnya
                     Navigator.of(context).pop(newTask);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
