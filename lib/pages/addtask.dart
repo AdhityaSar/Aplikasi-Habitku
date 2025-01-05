@@ -107,6 +107,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AddTask extends StatefulWidget {
+  final Map<String, dynamic>? task;
+
+  const AddTask({Key? key, this.task}) : super(key: key);
+
   @override
   _AddTaskState createState() => _AddTaskState();
 }
@@ -119,6 +123,26 @@ class _AddTaskState extends State<AddTask> {
   TimeOfDay? selectedTime;
 
   final List<String> categories = ['Study', 'Task', 'Sports', 'Other'];
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.task != null) {
+      _titleController.text = widget.task!['title'] ?? '';
+      _descriptionController.text = widget.task!['description'] ?? '';
+      selectedCategory = widget.task!['category'];
+      selectedDate = widget.task!['date'] is String
+          ? DateTime.parse(widget.task!['date'])
+          : widget.task!['date'];
+      selectedTime = widget.task!['time'] != null
+          ? TimeOfDay(
+              hour: int.parse(widget.task!['time'].split(":")[0]),
+              minute: int.parse(widget.task!['time'].split(":")[1]),
+            )
+          : null;
+    }
+  }
 
   @override
   void dispose() {
@@ -280,23 +304,23 @@ class _AddTaskState extends State<AddTask> {
               ),
               ElevatedButton(
                 child: Text('Confirm'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                ),
                 onPressed: () {
                   if (_titleController.text.isNotEmpty &&
                       selectedCategory != null &&
                       selectedDate != null &&
                       selectedTime != null) {
-                    // Membuat objek task baru
                     final newTask = {
                       'title': _titleController.text,
                       'description': _descriptionController.text,
                       'category': selectedCategory,
-                      'date': selectedDate,
-                      'time': selectedTime,
+                      'date': DateTime(
+                        selectedDate!.year,
+                        selectedDate!.month,
+                        selectedDate!.day,
+                        selectedTime!.hour,
+                        selectedTime!.minute,
+                      ), // Gabungkan tanggal dan waktu
                     };
-                    // Mengembalikan task baru ke halaman sebelumnya
                     Navigator.of(context).pop(newTask);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(

@@ -1,21 +1,22 @@
 // FILEPATH: d:/Semester_5/Aplikasi-Habitku/lib/my_navbar.dart
 
-import 'package:aplikasi_habitku/pages/historypage.dart';
-import 'package:aplikasi_habitku/pages/homepage.dart';
-import 'package:aplikasi_habitku/pages/settingspage.dart';
-import 'package:aplikasi_habitku/pages/statspage.dart';
-import 'package:aplikasi_habitku/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:aplikasi_habitku/pages/homepage.dart';
+import 'package:aplikasi_habitku/pages/statspage.dart';
+import 'package:aplikasi_habitku/pages/historypage.dart';
+import 'package:aplikasi_habitku/pages/settingspage.dart';
 import 'package:aplikasi_habitku/pages/addtask.dart';
+import 'package:aplikasi_habitku/theme/theme.dart';
 
 class MyNavbar extends StatefulWidget {
-  final ValueChanged<bool> onThemeChanged; // Callback untuk mengubah tema
-  final bool isDarkMode; // Status tema saat ini
+  final ValueChanged<bool> onThemeChanged;
+  final bool isDarkMode;
+
   const MyNavbar({
-    super.key, 
+    Key? key,
     required this.onThemeChanged,
     required this.isDarkMode,
-    });
+  }) : super(key: key);
 
   @override
   State<MyNavbar> createState() => _MyNavbarState();
@@ -25,23 +26,32 @@ class _MyNavbarState extends State<MyNavbar> {
   int _selectedIndex = 0;
   List<Map<String, dynamic>> tasks = [];
 
+  Future<Map<String, dynamic>?> _addNewTask(BuildContext context, [Map<String, dynamic>? task]) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddTask(task: task)),
+    );
+
+    if (result != null) {
+      if (task == null) {
+        setState(() {
+          tasks.add(result);
+        });
+      } else {
+        setState(() {
+          final index = tasks.indexOf(task);
+          tasks[index] = result;
+        });
+      }
+    }
+
+    return result;
+  }
+
   void _onTappedItem(int index) {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  void _addNewTask(BuildContext context) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => AddTask()),
-    );
-
-    if (result != null) {
-      setState(() {
-        tasks.add(result);
-      });
-    }
   }
 
   @override
@@ -54,22 +64,24 @@ class _MyNavbarState extends State<MyNavbar> {
           MyHomePage(tasks: tasks, onAddTask: _addNewTask),
           StatsPage(),
           Historypage(),
-          Settingspage( 
+          Settingspage(
             onThemeChanged: widget.onThemeChanged,
-             isDarkMode: widget.isDarkMode,
+            isDarkMode: widget.isDarkMode,
           ),
         ],
       ),
       bottomNavigationBar: Container(
         height: 70,
-       color: widget.isDarkMode ? Colors.black : Colors.white,
+        color: widget.isDarkMode ? Colors.black : Colors.white,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
               icon: Icon(
                 Icons.home,
-                color: _selectedIndex == 0 ? primary : (widget.isDarkMode ? Colors.white : Colors.black45),
+                color: _selectedIndex == 0
+                    ? primary
+                    : (widget.isDarkMode ? Colors.white : Colors.black45),
                 size: 30,
               ),
               onPressed: () => _onTappedItem(0),
@@ -77,7 +89,9 @@ class _MyNavbarState extends State<MyNavbar> {
             IconButton(
               icon: Icon(
                 Icons.bar_chart,
-                color: _selectedIndex == 1 ? primary : (widget.isDarkMode ? Colors.white : Colors.black45),
+                color: _selectedIndex == 1
+                    ? primary
+                    : (widget.isDarkMode ? Colors.white : Colors.black45),
                 size: 30,
               ),
               onPressed: () => _onTappedItem(1),
@@ -101,7 +115,9 @@ class _MyNavbarState extends State<MyNavbar> {
             IconButton(
               icon: Icon(
                 Icons.history,
-                 color: _selectedIndex == 2 ? primary : (widget.isDarkMode ? Colors.white : Colors.black45),
+                color: _selectedIndex == 2
+                    ? primary
+                    : (widget.isDarkMode ? Colors.white : Colors.black45),
                 size: 30,
               ),
               onPressed: () => _onTappedItem(2),
@@ -109,7 +125,9 @@ class _MyNavbarState extends State<MyNavbar> {
             IconButton(
               icon: Icon(
                 Icons.settings,
-                color: _selectedIndex == 3 ? primary : (widget.isDarkMode ? Colors.white : Colors.black45),
+                color: _selectedIndex == 3
+                    ? primary
+                    : (widget.isDarkMode ? Colors.white : Colors.black45),
                 size: 30,
               ),
               onPressed: () => _onTappedItem(3),
