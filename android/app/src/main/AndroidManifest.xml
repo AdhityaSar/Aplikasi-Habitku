@@ -3,6 +3,7 @@
         android:label="aplikasi_habitku"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+    
         <activity
             android:name=".MainActivity"
             android:exported="true"
