@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 
 class MyHomePage extends StatefulWidget {
   final List<Map<String, dynamic>> tasks;
-  final Function(BuildContext) onAddTask;
+  final Future<Map<String, dynamic>?> Function(BuildContext, Map<String, dynamic>?) onAddTask;
 
   const MyHomePage({Key? key, required this.tasks, required this.onAddTask}) : super(key: key);
 
@@ -14,28 +15,74 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToToday();
+    });
+  }
+
+  Future<void> _editTask(int index) async {
+    final task = widget.tasks[index];
+    final updatedTask = await widget.onAddTask(context, task);
+    if (updatedTask != null) {
+      setState(() {
+        widget.tasks[index] = updatedTask;
+      });
+    }
+  }
+
+  void _deleteTask(int index) {
+    setState(() {
+      widget.tasks.removeAt(index);
+    });
+  }
+
+  void _scrollToToday() {
+    // Posisi tanggal hari ini di tengah daftar
+    const int totalDates = 60;
+    const int todayIndex = totalDates ~/ 2;
+
+    _scrollController.animateTo(
+      todayIndex * 54.0, // 54.0 adalah lebar item (adjust jika berbeda)
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _scrollToSelectedDate() {
+    if (_selectedDay != null) {
+      final int index = DateTime.now().difference(_selectedDay!).inDays + 30;
+      _scrollController.animateTo(
+        index * 54.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          // Bagian Kalender Horizontal
           Padding(
-            padding: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
+            padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Todays',
+                    'Today\'s',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Row(
                     children: [
                       IconButton(
                           onPressed: () => _showMonthCalendar(context),
-                          icon: Icon(Icons.calendar_month,
-                              color: Color(0xffCDCDD0))),
+                          icon: Icon(Icons.calendar_month, color: Color(0xffCDCDD0))),
                       SizedBox(width: 8),
                       Icon(Icons.help_outline, color: Color(0xffCDCDD0)),
                     ],
@@ -47,44 +94,62 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               height: 64,
               child: ListView.builder(
+                controller: _scrollController,
                 scrollDirection: Axis.horizontal,
-                itemCount: 30,
+                itemCount: 60,
                 itemBuilder: (context, index) {
                   DateTime today = DateTime.now();
-                  DateTime date = today.add(Duration(days: index));
+                  DateTime date = today.add(Duration(days: index - 30));
                   bool isToday = date.day == today.day &&
                       date.month == today.month &&
                       date.year == today.year;
+                  bool isSelected = _selectedDay != null && isSameDay(_selectedDay!, date);
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                    child: Container(
-                      width: 48,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(16),
-                        color: isToday ? Color(0xff3843FF) : Colors.transparent,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            date.day.toString(),
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: isToday ? Colors.white : Colors.black,
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedDay = date;
+                      });
+                      _scrollToSelectedDate();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                      child: Container(
+                        width: 48,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(16),
+                          color: isSelected
+                              ? Color(0xff3843FF)
+                              : isToday
+                                  ? Color(0xff3843FF).withOpacity(0.3)
+                                  : Colors.transparent,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              date.day.toString(),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected || isToday
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            _getDayName(date),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: isToday ? Colors.white : Color(0xffa0a0a0),
-                            ),
-                          )
-                        ],
+                            SizedBox(height: 2),
+                            Text(
+                              _getDayName(date),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: isSelected || isToday
+                                    ? Colors.white
+                                    : Color(0xffa0a0a0),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -92,8 +157,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-
-          // Konten di Tengah
           Expanded(
             child: widget.tasks.isEmpty
                 ? Column(
@@ -127,10 +190,54 @@ class _MyHomePageState extends State<MyHomePage> {
                 : ListView.builder(
                     itemCount: widget.tasks.length,
                     itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(widget.tasks[index]['title']),
-                        subtitle: Text(widget.tasks[index]['description']),
-                        trailing: Text(widget.tasks[index]['category']),
+                      final task = widget.tasks[index];
+                      DateTime taskDate = task['date'] is String
+                          ? DateTime.parse(task['date'])
+                          : task['date'];
+
+                      return Card(
+                        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        child: ListTile(
+                          leading: Icon(
+                            _getIcon(task['category']),
+                            color: _getIconColor(task['category']),
+                            size: 40,
+                          ),
+                          title: Text(task['title'],
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 4),
+                              Text('Time: ${DateFormat('hh:mm a').format(taskDate)}',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 14)),
+                              SizedBox(height: 4),
+                              Text(task['description'],
+                                  style: TextStyle(fontSize: 14)),
+                            ],
+                          ),
+                          trailing: PopupMenuButton(
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                _editTask(index);
+                              } else if (value == 'delete') {
+                                _deleteTask(index);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Text('Edit'),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Text('Delete'),
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -140,7 +247,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  // Menambahkan modal calendar
   void _showMonthCalendar(BuildContext context) {
     showModalBottomSheet(
         context: context,
@@ -160,6 +266,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     _selectedDay = selectedDay;
                     _focusedDay = focusedDay;
                   });
+                  _scrollToSelectedDate();
                   Navigator.pop(context);
                 },
                 onPageChanged: (focusedDay) {
@@ -168,8 +275,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 headerStyle: HeaderStyle(formatButtonVisible: false),
                 calendarStyle: CalendarStyle(
                   selectedDecoration: BoxDecoration(
-                    color:
-                        Color(0xff3843FF), // Change this to your desired color
+                    color: Color(0xff3843FF),
                     shape: BoxShape.circle,
                   ),
                   selectedTextStyle: TextStyle(color: Colors.white),
@@ -183,9 +289,34 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
-  // Fungsi untuk mendapatkan nama hari (contoh: MON, TUE)
   String _getDayName(DateTime date) {
     List<String> days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     return days[date.weekday % 7];
+  }
+
+  IconData _getIcon(String category) {
+    switch (category) {
+      case 'Sports':
+        return Icons.sports;
+      case 'Study':
+        return Icons.book;
+      case 'Task':
+        return Icons.task;
+      default:
+        return Icons.event;
+    }
+  }
+
+  Color _getIconColor(String category) {
+    switch (category) {
+      case 'Sports':
+        return Colors.green;
+      case 'Study':
+        return Colors.blue;
+      case 'Task':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
   }
 }
