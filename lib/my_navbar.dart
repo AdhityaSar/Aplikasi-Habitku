@@ -35,7 +35,7 @@ class _MyNavbarState extends State<MyNavbar> {
 
     // Inisialisasi halaman setiap kali build dijalankan
     final _pages = <Widget>[
-      MyHomePage(tasks: [], onAddTask: (BuildContext ) {  },),
+      MyHomePage(tasks: [],),
       StatsPage(),
       Center(child: Text('Add Activity Page')), // Placeholder untuk Add Activity
       Historypage(),

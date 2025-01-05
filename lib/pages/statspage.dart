@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
@@ -9,8 +9,13 @@ class StatsPage extends StatefulWidget {
 }
 
 class _StatsPageState extends State<StatsPage> {
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
+  late TooltipBehavior _tooltipBehavior;
+
+  @override
+  void initState() {
+    _tooltipBehavior = TooltipBehavior(enable: true);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +37,9 @@ class _StatsPageState extends State<StatsPage> {
               padding: const EdgeInsets.all(16.0),
               child: Center(
                 child: Wrap(
-                  spacing: 16.0, 
-                  runSpacing: 16.0, 
-                  alignment: WrapAlignment.center, 
+                  spacing: 16.0,
+                  runSpacing: 16.0,
+                  alignment: WrapAlignment.center,
                   children: [
                     _buildStatsCard(
                       title: '12 Days',
@@ -61,13 +66,14 @@ class _StatsPageState extends State<StatsPage> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'CALENDAR',
+                'STATISTICS',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Container(
+                height: 300,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
@@ -79,34 +85,25 @@ class _StatsPageState extends State<StatsPage> {
                     ),
                   ],
                 ),
-                child: TableCalendar(
-                  firstDay: DateTime.utc(2020, 1, 1),
-                  lastDay: DateTime.utc(2030, 12, 31),
-                  focusedDay: _focusedDay,
-                  calendarFormat: CalendarFormat.month,
-                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      _selectedDay = selectedDay;
-                      _focusedDay = focusedDay;
-                    });
-                  },
-                  headerStyle: HeaderStyle(
-                    formatButtonVisible: false,
-                    titleCentered: true,
-                    leftChevronIcon: Icon(Icons.chevron_left),
-                    rightChevronIcon: Icon(Icons.chevron_right),
-                  ),
-                  calendarStyle: CalendarStyle(
-                    todayDecoration: BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
+                child: SfCartesianChart(
+                  primaryXAxis: CategoryAxis(),
+                  title: ChartTitle(text: 'Half yearly sales analysis'),
+                  legend: Legend(isVisible: true),
+                  tooltipBehavior: _tooltipBehavior,
+                  series: <LineSeries<SalesData, String>>[
+                    LineSeries<SalesData, String>(
+                      dataSource: <SalesData>[
+                        SalesData('Jan', 35),
+                        SalesData('Feb', 28),
+                        SalesData('Mar', 34),
+                        SalesData('Apr', 32),
+                        SalesData('May', 40),
+                      ],
+                      xValueMapper: (SalesData sales, _) => sales.year,
+                      yValueMapper: (SalesData sales, _) => sales.sales,
+                      dataLabelSettings: DataLabelSettings(isVisible: true),
                     ),
-                    selectedDecoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -123,7 +120,7 @@ class _StatsPageState extends State<StatsPage> {
     required IconData icon,
   }) {
     return Container(
-      width: 100, 
+      width: 100,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: color,
@@ -153,4 +150,10 @@ class _StatsPageState extends State<StatsPage> {
       ),
     );
   }
+}
+
+class SalesData {
+  SalesData(this.year, this.sales);
+  final String year;
+  final double sales;
 }
