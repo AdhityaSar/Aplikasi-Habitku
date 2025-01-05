@@ -1,3 +1,4 @@
+import 'package:aplikasi_habitku/pages/addtask.dart';
 import 'package:aplikasi_habitku/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'pages/homepage.dart';
@@ -34,7 +35,7 @@ class _MyNavbarState extends State<MyNavbar> {
 
     // Inisialisasi halaman setiap kali build dijalankan
     final _pages = <Widget>[
-      MyHomePage(),
+      MyHomePage(tasks: [], onAddTask: (BuildContext ) {  },),
       StatsPage(),
       Center(child: Text('Add Activity Page')), // Placeholder untuk Add Activity
       Historypage(),
@@ -84,7 +85,10 @@ class _MyNavbarState extends State<MyNavbar> {
                   color: Colors.white,
                   size: 25,
                 ),
-                onPressed: () => _onTappedItem(2),
+                onPressed: () {
+                    Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => AddTask()));
+                },
               ),
             ),
             IconButton(
