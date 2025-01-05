@@ -1,5 +1,3 @@
-// FILEPATH: d:/Semester_5/Aplikasi-Habitku/lib/my_navbar.dart
-
 import 'package:flutter/material.dart';
 import 'package:aplikasi_habitku/pages/homepage.dart';
 import 'package:aplikasi_habitku/pages/statspage.dart';
