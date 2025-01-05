@@ -1,3 +1,4 @@
+import 'package:aplikasi_habitku/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 class Settingspage extends StatefulWidget {
@@ -48,6 +49,7 @@ class _SettingspageState extends State<Settingspage> {
                   onChanged: (bool value) {
                     widget.onThemeChanged(value); // Mengubah tema
                   },
+                  activeColor: primary, // Mengubah warna switch ketika aktif
                 ),
               ],
             ),
