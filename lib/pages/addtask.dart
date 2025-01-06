@@ -27,25 +27,30 @@ class _AddTaskState extends State<AddTask> {
     {'icon': Icons.more_horiz, 'label': 'Other'},
   ];
 
-  @override
-  void initState() {
-    super.initState();
+@override
+void initState() {
+  super.initState();
 
-    // Isi form jika task tidak null (edit mode)
-    if (widget.task != null) {
-      _titleController.text = widget.task!.title;
-      _descriptionController.text = widget.task!.description;
-      selectedCategory = widget.task!.category;
-      selectedDate = DateTime.parse(widget.task!.date);
+  if (widget.task != null) {
+    _titleController.text = widget.task!.title;
+    _descriptionController.text = widget.task!.description;
+    selectedCategory = widget.task!.category;
+    selectedDate = DateTime.parse(widget.task!.date);
+
+    // Gunakan DateFormat untuk parsing waktu
+    try {
+      final parsedTime = DateFormat.jm().parse(widget.task!.time); // Format 12 jam (hh:mm a)
       selectedTime = TimeOfDay(
-        hour: int.parse(widget.task!.time.split(":")[0]),
-        minute: int.parse(widget.task!.time.split(":")[1]),
+        hour: parsedTime.hour,
+        minute: parsedTime.minute,
       );
+    } catch (e) {
+      print('Error parsing time: $e');
+      selectedTime = TimeOfDay.now(); // Default jika parsing gagal
     }
-
-    // Ambil data tasks jika diperlukan
-    fetchTasks();
   }
+}
+
 
   @override
   void dispose() {

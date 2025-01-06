@@ -8,7 +8,8 @@ class MyHomePage extends StatefulWidget {
   final List<Task> tasks;
   final Future<void> Function(BuildContext, [Task?]) onAddTask;
 
-  const MyHomePage({Key? key, required this.tasks, required this.onAddTask}) : super(key: key);
+  const MyHomePage({Key? key, required this.tasks, required this.onAddTask})
+      : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -33,20 +34,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _navigateToAddTask() async {
-  // Navigasi ke halaman AddTask
-  final newTask = await Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => AddTask()),
-  );
+    // Navigasi ke halaman AddTask
+    final newTask = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddTask()),
+    );
 
-  // Jika task baru berhasil dibuat
-  if (newTask != null && newTask is Task) {
-    setState(() {
-      tasks.add(newTask); // Tambahkan task baru ke daftar
-    });
+    // Jika task baru berhasil dibuat
+    if (newTask != null && newTask is Task) {
+      setState(() {
+        tasks.add(newTask); // Tambahkan task baru ke daftar
+      });
+    }
   }
-}
-
 
   Future<void> _loadTasks() async {
     final dbTasks = await DatabaseHelper.instance.queryAllRows();
@@ -94,7 +94,8 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
+            padding:
+                const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -106,7 +107,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       IconButton(
                           onPressed: () => _showMonthCalendar(context),
-                          icon: Icon(Icons.calendar_month, color: Color(0xffCDCDD0))),
+                          icon: Icon(Icons.calendar_month,
+                              color: Color(0xffCDCDD0))),
                       SizedBox(width: 8),
                       Icon(Icons.help_outline, color: Color(0xffCDCDD0)),
                     ],
@@ -235,7 +237,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       DateTime taskDate = DateTime.parse(task.date);
 
                       return Card(
-                        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        margin:
+                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                         child: ListTile(
                           leading: Icon(
                             _getIcon(task.category),
