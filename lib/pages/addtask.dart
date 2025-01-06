@@ -18,6 +18,7 @@ class _AddTaskState extends State<AddTask> {
   String? selectedCategory;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
+  List<Task> tasks = []; // Tambahkan variabel untuk menyimpan daftar tugas
 
   final List<Map<String, dynamic>> categories = [
     {'icon': Icons.book, 'label': 'Study'},
@@ -30,6 +31,7 @@ class _AddTaskState extends State<AddTask> {
   void initState() {
     super.initState();
 
+    // Isi form jika task tidak null (edit mode)
     if (widget.task != null) {
       _titleController.text = widget.task!.title;
       _descriptionController.text = widget.task!.description;
@@ -40,6 +42,9 @@ class _AddTaskState extends State<AddTask> {
         minute: int.parse(widget.task!.time.split(":")[1]),
       );
     }
+
+    // Ambil data tasks jika diperlukan
+    fetchTasks();
   }
 
   @override
@@ -47,6 +52,14 @@ class _AddTaskState extends State<AddTask> {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  // Fungsi untuk mengambil data tasks dari database
+  void fetchTasks() async {
+    final fetchedTasks = await DatabaseHelper.instance.queryAllRows();
+    setState(() {
+      tasks = fetchedTasks; // Perbarui state dengan data yang diambil
+    });
   }
 
   void _showCategoryDialog() {
@@ -62,7 +75,8 @@ class _AddTaskState extends State<AddTask> {
               itemCount: categories.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  leading: Icon(categories[index]['icon'] as IconData?, color: Color(0xff3843FF)),
+                  leading: Icon(categories[index]['icon'] as IconData?,
+                      color: Color(0xff3843FF)),
                   title: Text(categories[index]['label']),
                   onTap: () {
                     setState(() {
@@ -206,36 +220,40 @@ class _AddTaskState extends State<AddTask> {
                 onPressed: () => Navigator.of(context).pop(),
               ),
               ElevatedButton(
-  child: Text('Confirm'),
-  onPressed: () async {
-    if (_titleController.text.isNotEmpty &&
-        selectedCategory != null &&
-        selectedDate != null &&
-        selectedTime != null) {
-      final newTask = Task(
-        title: _titleController.text,
-        description: _descriptionController.text,
-        icon: categories.firstWhere((element) => element['label'] == selectedCategory)['icon'].codePoint,
-        date: DateFormat('yyyy-MM-dd').format(selectedDate!),
-        time: selectedTime!.format(context),
-        category: selectedCategory!,
-      );
+                child: Text('Confirm'),
+                onPressed: () async {
+                  if (_titleController.text.isNotEmpty &&
+                      selectedCategory != null &&
+                      selectedDate != null &&
+                      selectedTime != null) {
+                    final newTask = Task(
+                      title: _titleController.text,
+                      description: _descriptionController.text,
+                      icon: categories
+                          .firstWhere((element) =>
+                              element['label'] == selectedCategory)['icon']
+                          .codePoint,
+                      date: DateFormat('yyyy-MM-dd').format(selectedDate!),
+                      time: selectedTime!.format(context),
+                      category: selectedCategory!,
+                    );
 
-      if (widget.task == null) {
-        await DatabaseHelper.instance.insert(newTask);
-      } else {
-        await DatabaseHelper.instance.update(newTask);
-      }
+                    if (widget.task == null) {
+                      await DatabaseHelper.instance.insert(newTask);
+                    } else {
+                      await DatabaseHelper.instance.update(newTask);
+                    }
 
-      Navigator.of(context).pop(newTask); // Mengembalikan task baru ke halaman sebelumnya
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all required fields')),
-      );
-    }
-  },
-),
-
+                    fetchTasks(); // Panggil fetchTasks setelah perubahan data
+                    Navigator.of(context).pop(newTask);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Please fill all required fields')),
+                    );
+                  }
+                },
+              ),
             ],
           ),
         ),
