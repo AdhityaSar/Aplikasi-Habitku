@@ -1,13 +1,13 @@
 import 'package:aplikasi_habitku/models/task_model.dart';
+import 'package:aplikasi_habitku/helper/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
 
 class MyHomePage extends StatefulWidget {
-  final List<Map<String, dynamic>> tasks;
-  final Future<Map<String, dynamic>?> Function(BuildContext, Map<String, dynamic>?) onAddTask;
+  final Future<void> Function(BuildContext, [Task?]) onAddTask;
 
-  const MyHomePage({Key? key, required this.tasks, required this.onAddTask}) : super(key: key);
+  const MyHomePage({Key? key, required this.onAddTask}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -24,30 +24,32 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _scrollController = ScrollController();
     _selectedDay = DateTime.now();
-    // _loadTasks();
+    _loadTasks();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToToday();
     });
   }
 
-  Future<void> _editTask(int index) async {
-    final task = widget.tasks[index];
-    final updatedTask = await widget.onAddTask(context, task);
-    if (updatedTask != null) {
-      setState(() {
-        widget.tasks[index] = updatedTask;
-      });
-    }
-  }
-
-  void _deleteTask(int index) {
+  Future<void> _loadTasks() async {
+    final dbTasks = await DatabaseHelper.instance.queryAllRows();
     setState(() {
-      widget.tasks.removeAt(index);
+      tasks = dbTasks;
     });
   }
 
-    void _scrollToToday() {
+  Future<void> _editTask(int index) async {
+    final task = tasks[index];
+    await widget.onAddTask(context, task);
+    await _loadTasks();
+  }
+
+  Future<void> _deleteTask(int index) async {
+    await DatabaseHelper.instance.delete(tasks[index].id!);
+    await _loadTasks();
+  }
+
+  void _scrollToToday() {
     final middleIndex = 30;
     final middleOffset = middleIndex * 60.0;
 
@@ -94,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   )
                 ]),
           ),
-            Padding(
+          Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
               height: 64,
@@ -180,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           Expanded(
-            child: widget.tasks.isEmpty
+            child: tasks.isEmpty
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -210,33 +212,31 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   )
                 : ListView.builder(
-                    itemCount: widget.tasks.length,
+                    itemCount: tasks.length,
                     itemBuilder: (context, index) {
-                      final task = widget.tasks[index];
-                      DateTime taskDate = task['date'] is String
-                          ? DateTime.parse(task['date'])
-                          : task['date'];
+                      final task = tasks[index];
+                      DateTime taskDate = DateTime.parse(task.date);
 
                       return Card(
                         margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                         child: ListTile(
                           leading: Icon(
-                            _getIcon(task['category']),
-                            color: _getIconColor(task['category']),
+                            _getIcon(task.category),
+                            color: _getIconColor(task.category),
                             size: 40,
                           ),
-                          title: Text(task['title'],
+                          title: Text(task.title,
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16)),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(height: 4),
-                              Text('Time: ${DateFormat('hh:mm a').format(taskDate)}',
+                              Text('Time: ${task.time}',
                                   style: TextStyle(
                                       color: Colors.grey, fontSize: 14)),
                               SizedBox(height: 4),
-                              Text(task['description'],
+                              Text(task.description,
                                   style: TextStyle(fontSize: 14)),
                             ],
                           ),
