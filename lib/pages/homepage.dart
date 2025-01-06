@@ -1,13 +1,14 @@
 import 'package:aplikasi_habitku/models/task_model.dart';
 import 'package:aplikasi_habitku/helper/database_helper.dart';
+import 'package:aplikasi_habitku/pages/addtask.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-// import 'package:intl/intl.dart';
 
 class MyHomePage extends StatefulWidget {
+  final List<Task> tasks;
   final Future<void> Function(BuildContext, [Task?]) onAddTask;
 
-  const MyHomePage({Key? key, required this.onAddTask}) : super(key: key);
+  const MyHomePage({Key? key, required this.tasks, required this.onAddTask}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -30,6 +31,22 @@ class _MyHomePageState extends State<MyHomePage> {
       _scrollToToday();
     });
   }
+
+  Future<void> _navigateToAddTask() async {
+  // Navigasi ke halaman AddTask
+  final newTask = await Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => AddTask()),
+  );
+
+  // Jika task baru berhasil dibuat
+  if (newTask != null && newTask is Task) {
+    setState(() {
+      tasks.add(newTask); // Tambahkan task baru ke daftar
+    });
+  }
+}
+
 
   Future<void> _loadTasks() async {
     final dbTasks = await DatabaseHelper.instance.queryAllRows();

@@ -8,6 +8,7 @@ class DatabaseHelper {
 
   static final table = 'tasks';
 
+  // Column names
   static final columnId = 'id';
   static final columnTitle = 'title';
   static final columnDescription = 'description';
@@ -22,7 +23,7 @@ class DatabaseHelper {
 
   static Database? _database;
 
-  // Get database instance
+  // Get the database instance
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
@@ -40,7 +41,7 @@ class DatabaseHelper {
     );
   }
 
-  // Create database table
+  // Create the table
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE $table (
@@ -58,13 +59,16 @@ class DatabaseHelper {
   // Insert a task
   Future<int> insert(Task task) async {
     Database db = await database;
-    return await db.insert(table, task.toMap());
+    int result = await db.insert(table, task.toMap());
+    print('Inserted task: ${task.toMap()}, result: $result'); // Debugging
+    return result;
   }
 
   // Query all rows
   Future<List<Task>> queryAllRows() async {
     Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query(table);
+    print('Queried tasks: $maps'); // Debugging
     return List.generate(maps.length, (i) {
       return Task.fromMap(maps[i]);
     });
@@ -74,7 +78,8 @@ class DatabaseHelper {
   Future<List<Task>> queryTasksByDate(DateTime date) async {
     Database db = await database;
 
-    String formattedDate = "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    String formattedDate =
+        "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
     final List<Map<String, dynamic>> maps = await db.query(
       table,
@@ -82,6 +87,7 @@ class DatabaseHelper {
       whereArgs: [formattedDate],
     );
 
+    print('Queried tasks for date $formattedDate: $maps'); // Debugging
     return List.generate(maps.length, (i) {
       return Task.fromMap(maps[i]);
     });
@@ -90,21 +96,33 @@ class DatabaseHelper {
   // Update a task
   Future<int> update(Task task) async {
     Database db = await database;
-    return await db.update(
+    int result = await db.update(
       table,
       task.toMap(),
       where: '$columnId = ?',
       whereArgs: [task.id],
     );
+    print('Updated task: ${task.toMap()}, result: $result'); // Debugging
+    return result;
   }
 
   // Delete a task
   Future<int> delete(int id) async {
     Database db = await database;
-    return await db.delete(
+    int result = await db.delete(
       table,
       where: '$columnId = ?',
       whereArgs: [id],
     );
+    print('Deleted task with id: $id, result: $result'); // Debugging
+    return result;
+  }
+
+  // Clear all tasks (Optional utility function)
+  Future<int> clearTable() async {
+    Database db = await database;
+    int result = await db.delete(table);
+    print('Cleared table, result: $result'); // Debugging
+    return result;
   }
 }
