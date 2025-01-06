@@ -132,14 +132,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   bool isSelected =
                       _selectedDay != null && isSameDay(_selectedDay!, date);
 
+                  // Deteksi mode gelap atau terang
+                  bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
                   return GestureDetector(
                     onTap: () {
                       setState(() {
                         _selectedDay = date;
                       });
-                      // TODO: Add logic to filter tasks for the selected day
                     },
-                    behavior: HitTestBehavior.opaque, // Add this line
+                    behavior: HitTestBehavior.opaque,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6.0),
                       child: Container(
@@ -148,13 +150,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(16),
                           color: isSelected
-                              ? Color(0xff3843FF)
+                              ? Color(0xff3843FF) // Warna latar belakang untuk hari yang dipilih
                               : isToday
-                                  ? (_selectedDay != null &&
-                                          !isSameDay(_selectedDay!, today))
-                                      ? Color(0xffE6E8FF)
-                                      : Color(0xff3843FF)
-                                  : Colors.transparent,
+                                  ? (isDarkMode ? Colors.white : Color(0xffE6E8FF)) // Warna latar belakang untuk hari ini
+                                  : Colors.transparent, // Warna latar belakang untuk hari lainnya
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -164,15 +163,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: isSelected ||
-                                        (isToday &&
-                                            (_selectedDay == null ||
-                                                isSameDay(
-                                                    _selectedDay!, today)))
-                                    ? Colors.white
+                                color: isSelected
+                                    ? Colors.white // Teks putih untuk hari yang dipilih
                                     : isToday
-                                        ? Color(0xff3843FF)
-                                        : Colors.black,
+                                        ? (isDarkMode ? Colors.black : Color(0xff3843FF)) // Teks untuk hari ini di darkmode dan lightmode
+                                        : (isDarkMode ? Colors.white : Colors.black), // Teks untuk hari lainnya
                               ),
                             ),
                             SizedBox(height: 2),
@@ -180,15 +175,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               _getDayName(date),
                               style: TextStyle(
                                 fontSize: 10,
-                                color: isSelected ||
-                                        (isToday &&
-                                            (_selectedDay == null ||
-                                                isSameDay(
-                                                    _selectedDay!, today)))
-                                    ? Colors.white
+                                color: isSelected
+                                    ? Colors.white // Teks putih untuk hari yang dipilih
                                     : isToday
-                                        ? Color(0xff3843FF)
-                                        : Color(0xffa0a0a0),
+                                        ? (isDarkMode ? Colors.black : Color(0xff3843FF)) // Teks hari ini di darkmode dan lightmode
+                                        : (isDarkMode ? Colors.grey[300] : Colors.black45), // Teks hari lainnya
                               ),
                             )
                           ],
@@ -200,6 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
+
           Expanded(
             child: tasks.isEmpty
                 ? Column(
@@ -217,7 +209,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xff000000),
                         ),
                       ),
                       const SizedBox(height: 8),
