@@ -18,7 +18,7 @@ class _AddTaskState extends State<AddTask> {
   String? selectedCategory;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
-  List<Task> tasks = []; // Tambahkan variabel untuk menyimpan daftar tugas
+  bool isLoading = false;
 
   final List<Map<String, dynamic>> categories = [
     {'icon': Icons.book, 'label': 'Study'},
@@ -27,30 +27,28 @@ class _AddTaskState extends State<AddTask> {
     {'icon': Icons.more_horiz, 'label': 'Other'},
   ];
 
-@override
-void initState() {
-  super.initState();
+  @override
+  void initState() {
+    super.initState();
 
-  if (widget.task != null) {
-    _titleController.text = widget.task!.title;
-    _descriptionController.text = widget.task!.description;
-    selectedCategory = widget.task!.category;
-    selectedDate = DateTime.parse(widget.task!.date);
+    if (widget.task != null) {
+      _titleController.text = widget.task!.title;
+      _descriptionController.text = widget.task!.description;
+      selectedCategory = widget.task!.category;
+      selectedDate = DateTime.parse(widget.task!.date);
 
-    // Gunakan DateFormat untuk parsing waktu
-    try {
-      final parsedTime = DateFormat.jm().parse(widget.task!.time); // Format 12 jam (hh:mm a)
-      selectedTime = TimeOfDay(
-        hour: parsedTime.hour,
-        minute: parsedTime.minute,
-      );
-    } catch (e) {
-      print('Error parsing time: $e');
-      selectedTime = TimeOfDay.now(); // Default jika parsing gagal
+      try {
+        final parsedTime = DateFormat.jm().parse(widget.task!.time); // Format 12 jam
+        selectedTime = TimeOfDay(
+          hour: parsedTime.hour,
+          minute: parsedTime.minute,
+        );
+      } catch (e) {
+        print('Error parsing time: $e');
+        selectedTime = TimeOfDay.now();
+      }
     }
   }
-}
-
 
   @override
   void dispose() {
@@ -59,29 +57,23 @@ void initState() {
     super.dispose();
   }
 
-  // Fungsi untuk mengambil data tasks dari database
-  void fetchTasks() async {
-    final fetchedTasks = await DatabaseHelper.instance.queryAllRows();
-    setState(() {
-      tasks = fetchedTasks; // Perbarui state dengan data yang diambil
-    });
-  }
-
   void _showCategoryDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Category'),
-          content: Container(
+          title: const Text('Select Category'),
+          content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
               shrinkWrap: true,
               itemCount: categories.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  leading: Icon(categories[index]['icon'] as IconData?,
-                      color: Color(0xff3843FF)),
+                  leading: Icon(
+                    categories[index]['icon'] as IconData?,
+                    color: const Color(0xff3843FF),
+                  ),
                   title: Text(categories[index]['label']),
                   onTap: () {
                     setState(() {
@@ -128,92 +120,94 @@ void initState() {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add New Task'),
-        backgroundColor: Color(0xff3843FF),
+        title: const Text('Add New Task'),
+        backgroundColor: const Color(0xff3843FF),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                labelText: 'Task Name',
-                border: OutlineInputBorder(),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(
+                      labelText: 'Task Name',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _descriptionController,
+                    decoration: const InputDecoration(
+                      labelText: 'Description',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.category, color: Color(0xff3843FF)),
+                          SizedBox(width: 8),
+                          Text('Category'),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: _showCategoryDialog,
+                        child: Text(selectedCategory ?? 'Select Category'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.calendar_today, color: Color(0xff3843FF)),
+                          SizedBox(width: 8),
+                          Text('Date'),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: _showDatePicker,
+                        child: Text(
+                          selectedDate == null
+                              ? 'Select Date'
+                              : DateFormat('yyyy-MM-dd').format(selectedDate!),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.access_time, color: Color(0xff3843FF)),
+                          SizedBox(width: 8),
+                          Text('Time'),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: _showTimePicker,
+                        child: Text(
+                          selectedTime == null
+                              ? 'Select Time'
+                              : selectedTime!.format(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _descriptionController,
-              decoration: InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.category, color: Color(0xff3843FF)),
-                    SizedBox(width: 8),
-                    Text('Category'),
-                  ],
-                ),
-                TextButton(
-                  onPressed: _showCategoryDialog,
-                  child: Text(selectedCategory ?? 'Select Category'),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today, color: Color(0xff3843FF)),
-                    SizedBox(width: 8),
-                    Text('Date'),
-                  ],
-                ),
-                TextButton(
-                  onPressed: _showDatePicker,
-                  child: Text(
-                    selectedDate == null
-                        ? 'Select Date'
-                        : DateFormat('yyyy-MM-dd').format(selectedDate!),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.access_time, color: Color(0xff3843FF)),
-                    SizedBox(width: 8),
-                    Text('Time'),
-                  ],
-                ),
-                TextButton(
-                  onPressed: _showTimePicker,
-                  child: Text(
-                    selectedTime == null
-                        ? 'Select Time'
-                        : selectedTime!.format(context),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
       bottomNavigationBar: BottomAppBar(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -221,40 +215,56 @@ void initState() {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton(
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               ElevatedButton(
-                child: Text('Confirm'),
+                child: const Text('Confirm'),
                 onPressed: () async {
                   if (_titleController.text.isNotEmpty &&
                       selectedCategory != null &&
                       selectedDate != null &&
                       selectedTime != null) {
+                    setState(() {
+                      isLoading = true;
+                    });
+
                     final newTask = Task(
-                      title: _titleController.text,
-                      description: _descriptionController.text,
+                      title: _titleController.text.trim(),
+                      description: _descriptionController.text.trim(),
                       icon: categories
-                          .firstWhere((element) =>
-                              element['label'] == selectedCategory)['icon']
+                          .firstWhere(
+                              (element) => element['label'] == selectedCategory)['icon']
                           .codePoint,
                       date: DateFormat('yyyy-MM-dd').format(selectedDate!),
                       time: selectedTime!.format(context),
                       category: selectedCategory!,
                     );
 
-                    if (widget.task == null) {
-                      await DatabaseHelper.instance.insert(newTask);
-                    } else {
-                      await DatabaseHelper.instance.update(newTask);
-                    }
+                    try {
+                      if (widget.task == null) {
+                        await DatabaseHelper.instance.insert(newTask);
+                      } else {
+                        await DatabaseHelper.instance.update(newTask);
+                      }
 
-                    fetchTasks(); // Panggil fetchTasks setelah perubahan data
-                    Navigator.of(context).pop(newTask);
+                      setState(() {
+                        isLoading = false;
+                      });
+
+                      Navigator.of(context).pop(newTask); // Kembalikan task ke layar sebelumnya
+                    } catch (e) {
+                      print('Error: $e');
+                      setState(() {
+                        isLoading = false;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Failed to save task')),
+                      );
+                    }
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('Please fill all required fields')),
+                      const SnackBar(content: Text('Please fill all required fields')),
                     );
                   }
                 },

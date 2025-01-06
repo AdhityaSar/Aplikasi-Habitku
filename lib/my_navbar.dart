@@ -67,7 +67,7 @@ class _MyNavbarState extends State<MyNavbar> {
         children: [
           MyHomePage(tasks: tasks, onAddTask: _addNewTask),
           const Statspage(),
-          const Historypage(),
+          Historypage(),
           Settingspage(
             onThemeChanged: widget.onThemeChanged,
             isDarkMode: widget.isDarkMode,
