@@ -66,7 +66,7 @@ class _MyNavbarState extends State<MyNavbar> {
         index: _selectedIndex,
         children: [
           MyHomePage(tasks: tasks, onAddTask: _addNewTask),
-          const Statspage(),
+          StatsPage(),
           Historypage(),
           Settingspage(
             onThemeChanged: widget.onThemeChanged,
